@@ -2,16 +2,23 @@
 import { UserContext } from "../context/UserProvider"
 import Swal from 'sweetalert2'
 import { Navigate } from "react-router-dom"
+import { FaEyeSlash, FaEye } from 'react-icons/fa';
 
 const Login = () => {
 
     const [_correo, set_Correo] = useState("")
     const [_clave, set_Clave] = useState("")
     const { user, iniciarSession } = useContext(UserContext)
+    const [visiblePassword, setVisiblePassword] = useState(false);
 
     if (user != null) {
         return <Navigate to="/"/>
     }
+
+    
+    const handleVisiblePassword = () => {
+        setVisiblePassword((preVisible)=>!preVisible);
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -61,7 +68,7 @@ const Login = () => {
                     <div className="card o-hidden border-0 shadow-lg my-5">
                         <div className="card-body p-0">
 
-                            <div className="row">
+                            <div className="row Login-container-image">
                                 <div className="col-lg-6 d-none d-lg-block bg-login-image"></div>
                                 <div className="col-lg-6">
                                     <div className="p-5">
@@ -73,13 +80,22 @@ const Login = () => {
                                                 <input type="email" className="form-control form-control-user" aria-describedby="emailHelp" placeholder="Correo"
                                                     value={_correo}
                                                     onChange={(e) => set_Correo(e.target.value)}
+                                                    required
                                                 />
                                             </div>
-                                            <div className="form-group">
-                                                <input type="password" className="form-control form-control-user" placeholder="Contraseña"
+                                            <div className="form-group Input-password">
+                                                <input type={`${visiblePassword ? 'text' : 'password'}`} className="form-control form-control-user" placeholder="Contraseña"
                                                     value={_clave}
                                                     onChange={(e) => set_Clave(e.target.value)}
+                                                    required
                                                 />
+                                               <button className="Button-visible" type="button" onClick={handleVisiblePassword}>
+                                               {visiblePassword ? (
+                                                        <FaEyeSlash className="Button-icon" />
+                                                    ) : (
+                                                        <FaEye className="Button-icon" />
+                                                    )}
+                                               </button>
                                             </div>
                                             <button type="submit" className="btn btn-primary btn-user btn-block"> Ingresar </button>
                                             

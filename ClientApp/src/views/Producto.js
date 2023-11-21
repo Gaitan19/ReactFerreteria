@@ -5,12 +5,12 @@ import Swal from 'sweetalert2'
 
 
 const modeloProducto = {
-    idProducto :0,
-    codigo :"",
-    marca :"",
-    descripcion :"",
-    idCategoria :0,
-    stock :0,
+    idProducto: 0,
+    codigo: "",
+    marca: "",
+    descripcion: "",
+    idCategoria: 0,
+    stock: 1,
     precio: 0,
     esActivo: true
 }
@@ -25,8 +25,6 @@ const Producto = () => {
     const [verModal, setVerModal] = useState(false);
 
     const handleChange = (e) => {
-
-        console.log(e.target.value)
 
         let value;
 
@@ -59,7 +57,7 @@ const Producto = () => {
 
         if (response.ok) {
             let data = await response.json()
-            setProductos(data)
+            setProductos(() => data.filter((item) => item.esActivo))
             setPendiente(false)
         }
     }
@@ -115,7 +113,9 @@ const Producto = () => {
                     </Button>
 
                     <Button color="danger" size="sm"
-                        onClick={() => eliminarProducto(row.idProducto)}
+                        // onClick={() => eliminarProducto(row.idProducto)}
+                        onClick={() => eliminarProducto(row)}
+
                     >
                         <i className="fas fa-trash-alt"></i>
                     </Button>
@@ -195,35 +195,37 @@ const Producto = () => {
 
     }
 
-    const eliminarProducto = async (id) => {
+    const eliminarProducto = async (dataDelete) => {
 
-        Swal.fire({
-            title: 'Esta seguro?',
-            text: "Desea eliminar el producto",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Si, continuar',
-            cancelButtonText: 'No, volver'
-        }).then((result) => {
-            if (result.isConfirmed) {
 
-                const response = fetch("api/producto/Eliminar/" + id, { method: "DELETE" })
-                    .then(response => {
-                        if (response.ok) {
-
-                            obtenerProductos();
-
-                            Swal.fire(
-                                'Eliminado!',
-                                'El producto fue eliminado.',
-                                'success'
-                            )
-                        }
-                    })
-            }
+        delete dataDelete.idCategoriaNavigation;
+        let response;
+        dataDelete.esActivo = !dataDelete.esActivo
+        dataDelete.precio = -1
+        response = await fetch("api/producto/Editar", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(dataDelete)
         })
+
+        if (response.ok) {
+            await obtenerProductos();
+
+        } else {
+
+            Swal.fire(
+                'Opp!',
+                'No se pudo Eliminar.',
+                'warning'
+            )
+        }
+    }
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        guardarCambios();
     }
 
     return (
@@ -241,7 +243,7 @@ const Producto = () => {
                         progressPending={pendiente}
                         pagination
                         paginationComponentOptions={paginationComponentOptions}
-                        customStyles={ customStyles}
+                        customStyles={customStyles}
                     />
                 </CardBody>
             </Card>
@@ -251,73 +253,78 @@ const Producto = () => {
                     Detalle Producto
                 </ModalHeader>
                 <ModalBody>
-                    <Row>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Codigo</Label>
-                                <Input bsSize="sm" name="codigo" onChange={handleChange} value={producto.codigo} />
-                            </FormGroup>
-                        </Col>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Marca</Label>
-                                <Input bsSize="sm" name="marca" onChange={handleChange} value={producto.marca} />
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Descripcion</Label>
-                                <Input bsSize="sm" name="descripcion" onChange={handleChange} value={producto.descripcion} />
-                            </FormGroup>
-                        </Col>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Categoria</Label>
-                                <Input bsSize="sm" type={"select"} name="idCategoria" onChange={handleChange} value={producto.idCategoria} >
-                                    <option value={0}>Seleccionar</option>
-                                    {
-                                        categorias.map((item) => {
-                                            if (item.esActivo)
-                                                return (<option key={item.idCategoria} value={item.idCategoria}>{item.descripcion}</option>)
-                                        } )
-                                    }
-                                </Input>
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Stock</Label>
-                                <Input bsSize="sm" name="stock" onChange={handleChange} value={producto.stock} type="number" />
-                            </FormGroup>
-                        </Col>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Precio</Label>
-                                <Input bsSize="sm" name="precio" onChange={handleChange} value={producto.precio} type="number"/>
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm="6" >
-                            <FormGroup>
-                                <Label>Estado</Label>
-                                <Input bsSize="sm" type={"select"} name="esActivo" onChange={handleChange} value={producto.esActivo} >
-                                    <option value={true}>Activo</option>
-                                    <option value={false}>No Activo</option>
-                                </Input>
-                            </FormGroup>
-                        </Col>
-                    </Row>
+                    <form onSubmit={handleSubmit}>
+                        <Row>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Codigo</Label>
+                                    <Input bsSize="sm" name="codigo" onChange={handleChange} value={producto.codigo} />
+                                </FormGroup>
+                            </Col>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Marca</Label>
+                                    <Input bsSize="sm" name="marca" onChange={handleChange} value={producto.marca} required />
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Descripcion</Label>
+                                    <Input bsSize="sm" name="descripcion" onChange={handleChange} value={producto.descripcion} required />
+                                </FormGroup>
+                            </Col>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Categoria</Label>
+                                    <Input bsSize="sm" type={"select"} name="idCategoria" onChange={handleChange} value={producto.idCategoria} required>
+                                        <option value={0}>Seleccionar</option>
+                                        {
+                                            categorias.map((item) => {
+                                                if (item.esActivo)
+                                                    return (<option key={item.idCategoria} value={item.idCategoria}>{item.descripcion}</option>)
+                                            })
+                                        }
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Stock</Label>
+                                    <Input bsSize="sm" name="stock" onChange={handleChange} value={producto.stock} type="number" min={1} required />
+                                </FormGroup>
+                            </Col>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Precio</Label>
+                                    <Input bsSize="sm" name="precio" onChange={handleChange} value={producto.precio} type="number" min={1} required />
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm="6" >
+                                <FormGroup>
+                                    <Label>Estado</Label>
+                                    <Input bsSize="sm" type={"select"} name="esActivo" onChange={handleChange} value={producto.esActivo} >
+                                        <option value={true}>Activo</option>
+                                        <option value={false}>No Activo</option>
+                                    </Input>
 
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        <div className="Container-modal-buttons">
+                            <Button type="submit" size="sm" color="primary">Guardar</Button>
+                            <Button size="sm" color="danger" onClick={cerrarModal}>Cerrar</Button>
+                        </div>
+                    </form>
 
                 </ModalBody>
                 <ModalFooter>
-                    <Button size="sm" color="primary" onClick={guardarCambios}>Guardar</Button>
-                    <Button size="sm" color="danger" onClick={cerrarModal}>Cerrar</Button>
+
                 </ModalFooter>
             </Modal>
         </>

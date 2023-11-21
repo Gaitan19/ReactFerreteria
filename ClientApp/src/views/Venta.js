@@ -24,11 +24,12 @@ const Venta = () => {
     const [documentoCliente, setDocumentoCliente] = useState("")
     const [nombreCliente, setNombreCliente] = useState("")
 
-    const [tipoDocumento,setTipoDocumento] = useState("Boleta")
+    const [tipoDocumento, setTipoDocumento] = useState("Boleta")
     const [productos, setProductos] = useState([])
     const [total, setTotal] = useState(0)
     const [subTotal, setSubTotal] = useState(0)
     const [igv, setIgv] = useState(0)
+    const [tempProducts, setTempProducts] = useState([]);
 
     const reestablecer = () => {
         setDocumentoCliente("");
@@ -40,19 +41,27 @@ const Venta = () => {
         setIgv(0)
     }
 
+    const obtenerProductos = async () => {
+        let response = await fetch("api/producto/Lista");
+
+        if (response.ok) {
+            let data = await response.json()
+            setTempProducts(() => data.filter((item) => item.esActivo))
+        }
+    }
+
     //para obtener la lista de sugerencias
     const onSuggestionsFetchRequested = ({ value }) => {
-
         const api = fetch("api/venta/Productos/" + value)
             .then((response) => {
                 return response.ok ? response.json() : Promise.reject(response);
             })
             .then((dataJson) => {
-                setA_Productos(dataJson)
+                setA_Productos(() => dataJson.filter((item) => item.precio > 0))
             }).catch((error) => {
                 console.log("No se pudo obtener datos, mayor detalle: ", error)
             })
-        
+
     }
 
     //funcion que nos permite borrar las sugerencias
@@ -71,15 +80,15 @@ const Venta = () => {
         <span>
             {sugerencia.codigo + " - " + sugerencia.marca + " - " + sugerencia.descripcion}
         </span>
-     )
+    )
 
     //evento cuando cambie el valor del texto de busqueda
-    const onChange = (e, {newValue}) => {
+    const onChange = (e, { newValue }) => {
         setA_Busqueda(newValue)
     }
 
     const inputProps = {
-        placeholder : "Buscar producto",
+        placeholder: "Buscar producto",
         value: a_Busqueda,
         onChange
     }
@@ -87,8 +96,8 @@ const Venta = () => {
     const sugerenciaSeleccionada = (event, { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }) => {
 
         Swal.fire({
-            title: suggestion.marca +" - " + suggestion.descripcion,
-            text:"Ingrese la cantidad",
+            title: suggestion.marca + " - " + suggestion.descripcion,
+            text: "Ingrese la cantidad",
             input: 'text',
             inputAttributes: {
                 autocapitalize: 'off'
@@ -99,7 +108,8 @@ const Venta = () => {
             showLoaderOnConfirm: true,
             preConfirm: (inputValue) => {
 
-                
+                console.log(' :>> ',);
+
                 if (isNaN(parseFloat(inputValue))) {
                     setA_Busqueda("")
                     Swal.showValidationMessage(
@@ -121,7 +131,7 @@ const Venta = () => {
                     setProductos((anterior) => [...anterior, producto])
                     calcularTotal(arrayProductos)
                 }
-                
+
 
             },
             allowOutsideClick: () => !Swal.isLoading()
@@ -186,38 +196,40 @@ const Venta = () => {
             idUsuario: JSON.parse(user).idUsuario,
             subTotal: parseFloat(subTotal),
             igv: parseFloat(igv),
-            total:parseFloat(total),
+            total: parseFloat(total),
             listaProductos: productos
         }
 
+        console.log("numero de productos", venta.listaProductos)
 
-        const api = fetch("api/venta/Registrar", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(venta)
-        })
-        .then((response) => {
-            return response.ok ? response.json() : Promise.reject(response);
-        })
-        .then((dataJson) => {
-            reestablecer();
-            var data = dataJson;
-            Swal.fire(
-                'Venta Creada!',
-                'Numero de venta : ' + data.numeroDocumento,
-                'success'
-            )
 
-        }).catch((error) => {
-            Swal.fire(
-                'Opps!',
-                'No se pudo crear la venta',
-                'error'
-            )
-            console.log("No se pudo enviar la venta ", error)
-        })
+        // const api = fetch("api/venta/Registrar", {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json;charset=utf-8'
+        //     },
+        //     body: JSON.stringify(venta)
+        // })
+        //     .then((response) => {
+        //         return response.ok ? response.json() : Promise.reject(response);
+        //     })
+        //     .then((dataJson) => {
+        //         reestablecer();
+        //         var data = dataJson;
+        //         Swal.fire(
+        //             'Venta Creada!',
+        //             'Numero de venta : ' + data.numeroDocumento,
+        //             'success'
+        //         )
+
+        //     }).catch((error) => {
+        //         Swal.fire(
+        //             'Opps!',
+        //             'No se pudo crear la venta',
+        //             'error'
+        //         )
+        //         console.log("No se pudo enviar la venta ", error)
+        //     })
 
     }
 
@@ -236,13 +248,13 @@ const Venta = () => {
                                     <Col sm={6}>
                                         <FormGroup>
                                             <Label>Nro Documento</Label>
-                                            <Input bsSize="sm" value={documentoCliente} onChange={ (e) => setDocumentoCliente(e.target.value)} />
+                                            <Input bsSize="sm" value={documentoCliente} onChange={(e) => setDocumentoCliente(e.target.value)} />
                                         </FormGroup>
                                     </Col>
                                     <Col sm={6}>
                                         <FormGroup>
                                             <Label>Nombre</Label>
-                                            <Input bsSize="sm" value={nombreCliente} onChange={(e) => setNombreCliente(e.target.value)}/>
+                                            <Input bsSize="sm" value={nombreCliente} onChange={(e) => setNombreCliente(e.target.value)} />
                                         </FormGroup>
                                     </Col>
                                 </Row>
@@ -291,30 +303,30 @@ const Venta = () => {
                                                             <td colSpan="5">Sin productos</td>
                                                         </tr>
                                                     ) :
-                                                    (
-                                                        productos.map((item) => (
-                                                            <tr key={item.idProducto}>
-                                                                <td>
-                                                                    <Button color="danger" size="sm"
-                                                                        onClick={() => eliminarProducto(item.idProducto)}
-                                                                    >
-                                                                        <i className="fas fa-trash-alt"></i>
-                                                                    </Button>
-                                                                </td>
-                                                                <td>{item.descripcion}</td>
-                                                                <td>{item.cantidad}</td>
-                                                                <td>{item.precio}</td>
-                                                                <td>{item.total}</td>
-                                                            </tr>
-                                                        ))
-                                                    )
+                                                        (
+                                                            productos.map((item) => (
+                                                                <tr key={item.idProducto}>
+                                                                    <td>
+                                                                        <Button color="danger" size="sm"
+                                                                            onClick={() => eliminarProducto(item.idProducto)}
+                                                                        >
+                                                                            <i className="fas fa-trash-alt"></i>
+                                                                        </Button>
+                                                                    </td>
+                                                                    <td>{item.descripcion}</td>
+                                                                    <td>{item.cantidad}</td>
+                                                                    <td>{item.precio}</td>
+                                                                    <td>{item.total}</td>
+                                                                </tr>
+                                                            ))
+                                                        )
 
-                                                    
+
                                                 }
                                             </tbody>
                                         </Table>
                                     </Col>
-                                    
+
                                 </Row>
                             </CardBody>
                         </Card>
@@ -334,7 +346,7 @@ const Venta = () => {
                                     <Col sm={12}>
                                         <InputGroup size="sm" >
                                             <InputGroupText>Tipo:</InputGroupText>
-                                            <Input type="select" value={tipoDocumento} onChange={ (e) => setTipoDocumento(e.target.value)}>
+                                            <Input type="select" value={tipoDocumento} onChange={(e) => setTipoDocumento(e.target.value)}>
                                                 <option value="Boleta">Boleta</option>
                                                 <option value="Factura">Factura</option>
                                             </Input>
@@ -365,9 +377,9 @@ const Venta = () => {
                                         </InputGroup>
                                     </Col>
                                 </Row>
-                                
-                                
-                                
+
+
+
                             </CardBody>
                         </Card>
                     </Col>
