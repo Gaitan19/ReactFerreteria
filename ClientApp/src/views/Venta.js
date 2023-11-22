@@ -2,7 +2,7 @@
 import { Card, CardBody, CardHeader, Col, FormGroup, Input, InputGroup, InputGroupText, Label, Row, Table, Button } from "reactstrap";
 import Swal from 'sweetalert2'
 import Autosuggest from 'react-autosuggest';
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./css/Venta.css"
 import { UserContext } from "../context/UserProvider";
 
@@ -26,10 +26,12 @@ const Venta = () => {
 
     const [tipoDocumento, setTipoDocumento] = useState("Boleta")
     const [productos, setProductos] = useState([])
+    const [productsCart, setProductsCart] = useState([])
     const [total, setTotal] = useState(0)
     const [subTotal, setSubTotal] = useState(0)
     const [igv, setIgv] = useState(0)
     const [tempProducts, setTempProducts] = useState([]);
+    const [alreadyProductos, setAlreadyProductos] = useState(false);
 
     const reestablecer = () => {
         setDocumentoCliente("");
@@ -46,18 +48,51 @@ const Venta = () => {
 
         if (response.ok) {
             let data = await response.json()
-            setTempProducts(() => data.filter((item) => item.esActivo))
+            setTempProducts(() => data)
         }
     }
 
+    useEffect(() => {
+        obtenerProductos();
+    }, [])
+
     //para obtener la lista de sugerencias
     const onSuggestionsFetchRequested = ({ value }) => {
+
+
         const api = fetch("api/venta/Productos/" + value)
             .then((response) => {
                 return response.ok ? response.json() : Promise.reject(response);
             })
             .then((dataJson) => {
-                setA_Productos(() => dataJson.filter((item) => item.precio > 0))
+                console.log('dataJson :>> ', dataJson);
+                let isInCart = true;
+                dataJson.forEach((item) => {
+
+                    productsCart.forEach((tempItem) => {
+
+
+                        if (tempItem[0].idProducto === item.idProducto) {
+                            isInCart = false
+                        }
+                    })
+
+                })
+
+                setA_Productos(() => dataJson.filter((item) => {
+
+                    if (!alreadyProductos) {
+                        obtenerProductos();
+                        setAlreadyProductos((prev) => !prev)
+                    }
+                    const tempStock = tempProducts.filter((item2) => item2.idProducto === item.idProducto)
+                    // console.log("tempStock:", tempStock[0].stock)
+                    // console.log('item :>> ', item);
+                    // console.log('products :>> ', tempProducts);
+                    if (item.precio > 0 && isInCart && tempStock[0].stock > 0 && tempStock[0].esActivo) {
+                        return item
+                    }
+                }))
             }).catch((error) => {
                 console.log("No se pudo obtener datos, mayor detalle: ", error)
             })
@@ -93,7 +128,7 @@ const Venta = () => {
         onChange
     }
 
-    const sugerenciaSeleccionada = (event, { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }) => {
+    const sugerenciaSeleccionada = async (event, { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }) => {
 
         Swal.fire({
             title: suggestion.marca + " - " + suggestion.descripcion,
@@ -108,7 +143,7 @@ const Venta = () => {
             showLoaderOnConfirm: true,
             preConfirm: (inputValue) => {
 
-                console.log(' :>> ',);
+                obtenerProductos();
 
                 if (isNaN(parseFloat(inputValue))) {
                     setA_Busqueda("")
@@ -117,19 +152,32 @@ const Venta = () => {
                     )
                 } else {
 
-                    let producto = {
-                        idProducto: suggestion.idProducto,
-                        descripcion: suggestion.descripcion,
-                        cantidad: parseInt(inputValue),
-                        precio: suggestion.precio,
-                        total: suggestion.precio * parseFloat(inputValue)
-                    }
-                    let arrayProductos = []
-                    arrayProductos.push(...productos)
-                    arrayProductos.push(producto)
+                    const tempStock = tempProducts.filter((item) => item.idProducto === suggestion.idProducto)
 
-                    setProductos((anterior) => [...anterior, producto])
-                    calcularTotal(arrayProductos)
+                    if (parseInt(inputValue) > tempStock[0].stock) {
+
+                        setA_Busqueda("")
+                        Swal.showValidationMessage(
+                            `La cantidad excede al stock:${tempStock[0].stock}`
+                        )
+                    } else {
+
+                        setProductsCart(() => [...productsCart, tempStock])
+
+                        let producto = {
+                            idProducto: suggestion.idProducto,
+                            descripcion: suggestion.descripcion,
+                            cantidad: parseInt(inputValue),
+                            precio: suggestion.precio,
+                            total: suggestion.precio * parseFloat(inputValue)
+                        }
+                        let arrayProductos = []
+                        arrayProductos.push(...productos)
+                        arrayProductos.push(producto)
+
+                        setProductos((anterior) => [...anterior, producto])
+                        calcularTotal(arrayProductos)
+                    }
                 }
 
 
@@ -146,11 +194,10 @@ const Venta = () => {
     }
 
     const eliminarProducto = (id) => {
-
         let listaproductos = productos.filter(p => p.idProducto != id)
-
+        const tempProductsCart = productsCart.filter((item) => item[0].idProducto !== id)
+        setProductsCart(() => tempProductsCart)
         setProductos(listaproductos)
-
         calcularTotal(listaproductos)
     }
 
@@ -200,36 +247,37 @@ const Venta = () => {
             listaProductos: productos
         }
 
-        console.log("numero de productos", venta.listaProductos)
+        setProductsCart([]);
+
+        const api = fetch("api/venta/Registrar", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(venta)
+        })
+            .then((response) => {
+                return response.ok ? response.json() : Promise.reject(response);
+            })
+            .then((dataJson) => {
+                reestablecer();
+                var data = dataJson;
+                Swal.fire(
+                    'Venta Creada!',
+                    'Numero de venta : ' + data.numeroDocumento,
+                    'success'
+                )
+                obtenerProductos();
 
 
-        // const api = fetch("api/venta/Registrar", {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json;charset=utf-8'
-        //     },
-        //     body: JSON.stringify(venta)
-        // })
-        //     .then((response) => {
-        //         return response.ok ? response.json() : Promise.reject(response);
-        //     })
-        //     .then((dataJson) => {
-        //         reestablecer();
-        //         var data = dataJson;
-        //         Swal.fire(
-        //             'Venta Creada!',
-        //             'Numero de venta : ' + data.numeroDocumento,
-        //             'success'
-        //         )
-
-        //     }).catch((error) => {
-        //         Swal.fire(
-        //             'Opps!',
-        //             'No se pudo crear la venta',
-        //             'error'
-        //         )
-        //         console.log("No se pudo enviar la venta ", error)
-        //     })
+            }).catch((error) => {
+                Swal.fire(
+                    'Opps!',
+                    'No se pudo crear la venta',
+                    'error'
+                )
+                console.log("No se pudo enviar la venta ", error)
+            })
 
     }
 
