@@ -3,6 +3,7 @@ import DataTable from 'react-data-table-component';
 import { Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody, Label, Input, FormGroup, ModalFooter, Row, Col } from "reactstrap"
 import Swal from 'sweetalert2'
 import { FaEyeSlash, FaEye } from 'react-icons/fa';
+import { cifrarPassword, decifrarPassword } from "../utils/cifrado";
 
 
 
@@ -59,7 +60,15 @@ const Usuario = () => {
 
         if (response.ok) {
             let data = await response.json()
-            setUsuarios(() => data.filter((item) => item.esActivo))
+            const tempData = [];
+            data.forEach((item) => {
+                if (item.esActivo) {
+                    item.clave = decifrarPassword(item.clave);
+                    tempData.push(item)
+                }
+            })
+            // setUsuarios(() => data.filter((item) => item.esActivo))
+            setUsuarios(() => tempData)
             setPendiente(false)
         }
 
@@ -162,6 +171,7 @@ const Usuario = () => {
 
         let response;
         if (usuario.idUsuario == 0) {
+            usuario.clave = cifrarPassword(usuario.clave);
             response = await fetch("api/usuario/Guardar", {
                 method: 'POST',
                 headers: {
@@ -171,6 +181,7 @@ const Usuario = () => {
             })
 
         } else {
+            usuario.clave = cifrarPassword(usuario.clave);
             response = await fetch("api/usuario/Editar", {
                 method: 'PUT',
                 headers: {
@@ -196,6 +207,7 @@ const Usuario = () => {
     }
 
     const eliminarUsuario = async (usuarioDelete) => {
+
 
         Swal.fire({
             title: 'Esta seguro?',

@@ -1,8 +1,9 @@
-﻿import { useContext, useState } from "react"
+﻿import { useContext, useEffect, useState } from "react"
 import { UserContext } from "../context/UserProvider"
 import Swal from 'sweetalert2'
 import { Navigate } from "react-router-dom"
 import { FaEyeSlash, FaEye } from 'react-icons/fa';
+import { cifrarPassword, decifrarPassword } from "../utils/cifrado";
 
 const Login = () => {
 
@@ -10,52 +11,107 @@ const Login = () => {
     const [_clave, set_Clave] = useState("")
     const { user, iniciarSession } = useContext(UserContext)
     const [visiblePassword, setVisiblePassword] = useState(false);
+    const [usuarios, setUsuarios] = useState([]);
+    const [userFound, setUserFound] = useState(false);
+    const [usuario, setUsuario] = useState({});
 
-    if (user != null) {
-        return <Navigate to="/"/>
+    const obtenerUsuarios = async () => {
+        let response = await fetch("api/usuario/Lista");
+
+        if (response.ok) {
+            let data = await response.json()
+            const tempData = [];
+            data.forEach((item) => {
+                if (item.esActivo) {
+                    item.clave = decifrarPassword(item.clave);
+                    tempData.push(item)
+                }
+            })
+            setUsuarios(() => tempData)
+        }
+
     }
 
-    
+    useEffect(() => {
+        obtenerUsuarios();
+    }, [])
+
+
+    if (user != null) {
+        return <Navigate to="/" />
+    }
+
+
+
     const handleVisiblePassword = () => {
-        setVisiblePassword((preVisible)=>!preVisible);
+        setVisiblePassword((preVisible) => !preVisible);
     };
+
 
     const handleSubmit = (event) => {
         event.preventDefault();
 
         let request = {
             correo: _correo,
-            clave:_clave
+            clave: _clave
         }
+        let data;
+        let foundedData = false;
 
-        const api = fetch("api/session/Login", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(request)
-        })
-        .then((response) => {
-            return response.ok ? response.json() : Promise.reject(response);
-        })
-        .then((dataJson) => {
-            if (dataJson.idUsuario == 0) {
-                Swal.fire(
-                    'Opps!',
-                    'No se encontro el usuario',
-                    'error'
-                )
-            } else {
-                iniciarSession(dataJson)
+        console.log('request :>> ', _clave + ",correo:", _correo);
+        console.log('usuarios :>> ', usuarios);
+
+        usuarios.forEach((item) => {
+            if (item.clave === _clave && item.correo === _correo) {
+                data = item;
+                foundedData = true;
+
             }
+        })
 
-        }).catch((error) => {
+        data.clave = cifrarPassword(data.clave);
+
+        if (foundedData) {
+            iniciarSession(data)
+        }
+        else {
             Swal.fire(
                 'Opps!',
                 'No se pudo iniciar sessión',
                 'error'
             )
-        })
+        }
+
+
+
+        // const api = fetch("api/session/Login", {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json;charset=utf-8'
+        //     },
+        //     body: JSON.stringify(request)
+        // })
+        //     .then((response) => {
+        //         return response.ok ? response.json() : Promise.reject(response);
+        //     })
+        //     .then((dataJson) => {
+        //         if (dataJson.idUsuario == 0) {
+        //             Swal.fire(
+        //                 'Opps!',
+        //                 'No se encontro el usuario',
+        //                 'error'
+        //             )
+        //         } else {
+        //             iniciarSession(dataJson)
+        //         }
+
+        //     }).catch((error) => {
+        //         Swal.fire(
+        //             'Opps!',
+        //             'No se pudo iniciar sessión',
+        //             'error'
+        //         )
+        //     })
     }
 
     return (
@@ -89,30 +145,30 @@ const Login = () => {
                                                     onChange={(e) => set_Clave(e.target.value)}
                                                     required
                                                 />
-                                               <button className="Button-visible" type="button" onClick={handleVisiblePassword}>
-                                               {visiblePassword ? (
+                                                <button className="Button-visible" type="button" onClick={handleVisiblePassword}>
+                                                    {visiblePassword ? (
                                                         <FaEyeSlash className="Button-icon" />
                                                     ) : (
                                                         <FaEye className="Button-icon" />
                                                     )}
-                                               </button>
+                                                </button>
                                             </div>
                                             <button type="submit" className="btn btn-primary btn-user btn-block"> Ingresar </button>
-                                            
+
                                         </form>
                                         <hr></hr>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                </div>
+                    </div>
 
                 </div>
 
             </div>
 
         </div>
-        )
+    )
 }
 
 export default Login
