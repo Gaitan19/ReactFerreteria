@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody, Labe
 import Swal from 'sweetalert2'
 
 const modeloCategoria = {
-    idCategoria:0,
+    idCategoria: 0,
     descripcion: "",
     esActivo: true
 }
@@ -30,7 +30,7 @@ const Categoria = () => {
 
         if (response.ok) {
             let data = await response.json()
-            setCategorias(data)
+            setCategorias(() => data.filter((item) => item.esActivo))
             setPendiente(false)
         }
     }
@@ -63,13 +63,13 @@ const Categoria = () => {
             cell: row => (
                 <>
                     <Button color="primary" size="sm" className="mr-2"
-                        onClick={() => abrirEditarModal(row) }
+                        onClick={() => abrirEditarModal(row)}
                     >
                         <i className="fas fa-pen-alt"></i>
                     </Button>
 
                     <Button color="danger" size="sm"
-                        onClick={ () => eliminarCategoria(row.idCategoria)}
+                        onClick={() => eliminarCategoria(row)}
                     >
                         <i className="fas fa-trash-alt"></i>
                     </Button>
@@ -121,7 +121,7 @@ const Categoria = () => {
                 },
                 body: JSON.stringify(categoria)
             })
-           
+
         } else {
             response = await fetch("api/categoria/Editar", {
                 method: 'PUT',
@@ -144,7 +144,7 @@ const Categoria = () => {
     }
 
 
-    const eliminarCategoria = async(id) => {
+    const eliminarCategoria = async (deleteCategoria) => {
 
         Swal.fire({
             title: 'Esta seguro?',
@@ -155,27 +155,53 @@ const Categoria = () => {
             cancelButtonColor: '#d33',
             confirmButtonText: 'Si, continuar',
             cancelButtonText: 'No, volver'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
+                let response;
 
-                const response = fetch("api/categoria/Eliminar/" + id, { method: "DELETE" })
-                    .then( response => {
-                        if (response.ok) {
+                deleteCategoria.esActivo = false
 
-                            obtenerCategorias();
+                response = await fetch("api/categoria/Editar", {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(deleteCategoria)
+                })
+                if (response.ok) {
 
-                            Swal.fire(
-                                'Eliminado!',
-                                'La categoria fue eliminada.',
-                                'success'
-                            )
-                        }
-                    })
-               
+                    obtenerCategorias();
+
+                    Swal.fire(
+                        'Eliminado!',
+                        'La categoria fue eliminada.',
+                        'success'
+                    )
+                }
+
+                // const response = fetch("api/categoria/Eliminar/" + id, { method: "DELETE" })
+                //     .then(response => {
+                //         if (response.ok) {
+
+                //             obtenerCategorias();
+
+                //             Swal.fire(
+                //                 'Eliminado!',
+                //                 'La categoria fue eliminada.',
+                //                 'success'
+                //             )
+                //         }
+                //     })
+
             }
         })
     }
-    
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        guardarCambios();
+    }
+
     return (
         <>
             <Card>
@@ -183,7 +209,7 @@ const Categoria = () => {
                     Lista de Categorias
                 </CardHeader>
                 <CardBody>
-                    <Button color="success" size="sm" onClick={() => setVerModal(!verModal) }>Nueva Categoria</Button>
+                    <Button color="success" size="sm" onClick={() => setVerModal(!verModal)}>Nueva Categoria</Button>
                     <hr></hr>
                     <DataTable
                         columns={columns}
@@ -191,7 +217,7 @@ const Categoria = () => {
                         progressPending={pendiente}
                         pagination
                         paginationComponentOptions={paginationComponentOptions}
-                        customStyles={ customStyles}
+                        customStyles={customStyles}
                     />
                 </CardBody>
             </Card>
@@ -200,26 +226,28 @@ const Categoria = () => {
                 <ModalHeader>
                     Detalle Categoria
                 </ModalHeader>
-                <ModalBody>
-                    <FormGroup>
-                        <Label>Descripción</Label>
-                        <Input bsSize="sm" name="descripcion" onChange={handleChange} value={categoria.descripcion}/>
-                    </FormGroup>
-                    <FormGroup>
-                        <Label>Estado</Label>
-                        <Input bsSize="sm" type={"select"} name="esActivo" onChange={handleChange} value={categoria.esActivo} >
-                            <option value={true}>Activo</option>
-                            <option value={false}>No Activo</option>
-                        </Input>
-                    </FormGroup>
-                </ModalBody>
-                <ModalFooter>
-                    <Button size="sm" color="primary" onClick={guardarCambios}>Guardar</Button>
-                    <Button size="sm" color="danger" onClick={cerrarModal}>Cerrar</Button>
-                </ModalFooter>
+                <form onSubmit={handleSubmit}>
+                    <ModalBody>
+                        <FormGroup>
+                            <Label>Descripción</Label>
+                            <Input bsSize="sm" name="descripcion" onChange={handleChange} value={categoria.descripcion} required />
+                        </FormGroup>
+                        <FormGroup>
+                            <Label>Estado</Label>
+                            <Input bsSize="sm" type={"select"} name="esActivo" onChange={handleChange} value={categoria.esActivo} >
+                                <option value={true}>Activo</option>
+                                <option value={false}>No Activo</option>
+                            </Input>
+                        </FormGroup>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button size="sm" color="primary" type="submit">Guardar</Button>
+                        <Button size="sm" color="danger" onClick={cerrarModal}>Cerrar</Button>
+                    </ModalFooter>
+                </form>
             </Modal>
         </>
-        
+
 
 
     )

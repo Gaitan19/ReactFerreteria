@@ -48,7 +48,9 @@ const Producto = () => {
         let response = await fetch("api/categoria/Lista");
         if (response.ok) {
             let data = await response.json()
-            setCategorias(data)
+            // setCategorias(data)
+            setCategorias(() => data.filter((item) => item.esActivo))
+            console.log('categorias :>> ', categorias);
         }
     }
 
@@ -197,30 +199,47 @@ const Producto = () => {
 
     const eliminarProducto = async (dataDelete) => {
 
+        Swal.fire({
+            title: 'Esta seguro?',
+            text: "Desesa eliminar este producto",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, continuar',
+            cancelButtonText: 'No, volver'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
 
-        delete dataDelete.idCategoriaNavigation;
-        let response;
-        dataDelete.esActivo = !dataDelete.esActivo
-        dataDelete.precio = -1
-        response = await fetch("api/producto/Editar", {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(dataDelete)
+                delete dataDelete.idCategoriaNavigation;
+                let response;
+                dataDelete.esActivo = !dataDelete.esActivo
+                dataDelete.precio = -1
+                response = await fetch("api/producto/Editar", {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(dataDelete)
+                })
+
+                if (response.ok) {
+                    await obtenerProductos();
+
+                } else {
+
+                    Swal.fire(
+                        'Opp!',
+                        'No se pudo Eliminar.',
+                        'warning'
+                    )
+                }
+
+            }
         })
 
-        if (response.ok) {
-            await obtenerProductos();
 
-        } else {
 
-            Swal.fire(
-                'Opp!',
-                'No se pudo Eliminar.',
-                'warning'
-            )
-        }
     }
 
     const handleSubmit = (event) => {

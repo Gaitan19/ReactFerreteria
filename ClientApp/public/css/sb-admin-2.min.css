@@ -12134,6 +12134,19 @@ form.user .form-control-user {
     top: 22%;
 }
 
+.Button-visible-usuario{
+    background: none;
+    border: none;
+    position: absolute;
+    right: 4%;
+    top: 43%;
+}
+
+.Input-user-new{
+    padding-right: 25px;
+    position: relative;
+}
+
 .Container-modal-buttons{
     display: flex;
     gap: 11px;

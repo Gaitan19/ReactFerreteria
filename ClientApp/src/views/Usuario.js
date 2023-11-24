@@ -2,16 +2,18 @@
 import DataTable from 'react-data-table-component';
 import { Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody, Label, Input, FormGroup, ModalFooter, Row, Col } from "reactstrap"
 import Swal from 'sweetalert2'
+import { FaEyeSlash, FaEye } from 'react-icons/fa';
+
 
 
 const modeloUsuario = {
     idUsuario: 0,
-    nombre : "",
-    correo :"",
-    telefono :"",
-    idRol :0,
-    clave :"",
-    esActivo :true
+    nombre: "",
+    correo: "",
+    telefono: "",
+    idRol: 0,
+    clave: "",
+    esActivo: true
 }
 
 const Usuario = () => {
@@ -21,10 +23,11 @@ const Usuario = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [roles, setRoles] = useState([]);
     const [verModal, setVerModal] = useState(false);
+    const [visiblePassword, setVisiblePassword] = useState(false);
+
 
     const handleChange = (e) => {
 
-        console.log(e.target.value )
 
         let value;
 
@@ -56,9 +59,10 @@ const Usuario = () => {
 
         if (response.ok) {
             let data = await response.json()
-            setUsuarios(data)
+            setUsuarios(() => data.filter((item) => item.esActivo))
             setPendiente(false)
         }
+
     }
 
     useEffect(() => {
@@ -111,7 +115,7 @@ const Usuario = () => {
                     </Button>
 
                     <Button color="danger" size="sm"
-                        onClick={() => eliminarUsuario(row.idUsuario)}
+                        onClick={() => eliminarUsuario(row)}
                     >
                         <i className="fas fa-trash-alt"></i>
                     </Button>
@@ -149,6 +153,7 @@ const Usuario = () => {
     const cerrarModal = () => {
         setUsuario(modeloUsuario)
         setVerModal(!verModal);
+        setVisiblePassword(() => false);
     }
 
     const guardarCambios = async () => {
@@ -179,14 +184,18 @@ const Usuario = () => {
             await obtenerUsuarios();
             setUsuario(modeloUsuario)
             setVerModal(!verModal);
+            setVisiblePassword(() => false);
+
 
         } else {
+            setVisiblePassword(() => false);
+
             alert("error al guardar")
         }
 
     }
 
-    const eliminarUsuario = async (id) => {
+    const eliminarUsuario = async (usuarioDelete) => {
 
         Swal.fire({
             title: 'Esta seguro?',
@@ -197,25 +206,57 @@ const Usuario = () => {
             cancelButtonColor: '#d33',
             confirmButtonText: 'Si, continuar',
             cancelButtonText: 'No, volver'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
 
-                const response = fetch("api/usuario/Eliminar/" + id, { method: "DELETE" })
-                    .then(response => {
-                        if (response.ok) {
+                let response;
+                delete usuarioDelete.idRolNavigation;
+                usuarioDelete.esActivo = false
+                usuarioDelete.correo = "userDeleted@mail.com"
 
-                            obtenerUsuarios();
+                response = await fetch("api/usuario/Editar", {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(usuarioDelete)
+                })
 
-                            Swal.fire(
-                                'Eliminado!',
-                                'El usuario fue eliminado.',
-                                'success'
-                            )
-                        }
-                    })
+                if (response.ok) {
+
+                    obtenerUsuarios();
+
+                    Swal.fire(
+                        'Eliminado!',
+                        'El usuario fue eliminado.',
+                        'success'
+                    )
+                }
+                // const response = fetch("api/usuario/Eliminar/" + id, { method: "DELETE" })
+                //     .then(response => {
+                //         if (response.ok) {
+
+                //             obtenerUsuarios();
+
+                //             Swal.fire(
+                //                 'Eliminado!',
+                //                 'El usuario fue eliminado.',
+                //                 'success'
+                //             )
+                //         }
+                //     })
             }
         })
     }
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        guardarCambios();
+    }
+
+    const handleVisiblePassword = () => {
+        setVisiblePassword((preVisible) => !preVisible);
+    };
 
 
     return (
@@ -242,65 +283,74 @@ const Usuario = () => {
                 <ModalHeader>
                     Detalle Usuario
                 </ModalHeader>
-                <ModalBody>
-                    <Row>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Nombre</Label>
-                                <Input bsSize="sm" name="nombre" onChange={handleChange} value={usuario.nombre} />
-                            </FormGroup>
-                        </Col>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Correo</Label>
-                                <Input bsSize="sm" name="correo" onChange={handleChange} value={usuario.correo} />
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Telefono</Label>
-                                <Input bsSize="sm" name="telefono" onChange={handleChange} value={usuario.telefono} />
-                            </FormGroup>
-                        </Col>
-                        <Col sm={6}>
-                            <FormGroup>
-                                <Label>Rol</Label>
-                                <Input bsSize="sm" type={"select"} name="idRol" onChange={handleChange} value={usuario.idRol} >
-                                    <option value={0}>Seleccionar</option>
-                                    {
-                                        roles.map((item) => (<option key={item.idRol} value={item.idRol}>{item.descripcion}</option>))
-                                    }
+                <form onSubmit={handleSubmit}>
+                    <ModalBody>
+                        <Row>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Nombre</Label>
+                                    <Input bsSize="sm" name="nombre" onChange={handleChange} value={usuario.nombre} required />
+                                </FormGroup>
+                            </Col>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Correo</Label>
+                                    <Input bsSize="sm" name="correo" onChange={handleChange} value={usuario.correo} type="email" required />
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Telefono</Label>
+                                    <Input bsSize="sm" name="telefono" onChange={handleChange} value={usuario.telefono} />
+                                </FormGroup>
+                            </Col>
+                            <Col sm={6}>
+                                <FormGroup>
+                                    <Label>Rol</Label>
+                                    <Input bsSize="sm" type={"select"} name="idRol" onChange={handleChange} value={usuario.idRol} required>
+                                        <option value={0}>Seleccionar</option>
+                                        {
+                                            roles.map((item) => (<option key={item.idRol} value={item.idRol}>{item.descripcion}</option>))
+                                        }
 
-                                </Input>
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm="6" >
-                            <FormGroup>
-                                <Label>Contraseña</Label>
-                                <Input bsSize="sm" name="clave" onChange={handleChange} value={usuario.clave} type="password" />
-                            </FormGroup>
-                        </Col>
-                        <Col sm="6" >
-                            <FormGroup>
-                                <Label>Estado</Label>
-                                <Input bsSize="sm" type={"select"} name="esActivo" onChange={handleChange} value={usuario.esActivo} >
-                                    <option value={true}>Activo</option>
-                                    <option value={false}>No Activo</option>
-                                </Input>
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                    
-                   
-                </ModalBody>
-                <ModalFooter>
-                    <Button size="sm" color="primary" onClick={guardarCambios}>Guardar</Button>
-                    <Button size="sm" color="danger" onClick={cerrarModal}>Cerrar</Button>
-                </ModalFooter>
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm="6" >
+                                <FormGroup>
+                                    <Label>Contraseña</Label>
+                                    <Input className="Input-user-new" bsSize="sm" name="clave" onChange={handleChange} value={usuario.clave} type={`${visiblePassword ? 'text' : 'password'}`} required />
+                                    <button className="Button-visible-usuario" type="button" onClick={handleVisiblePassword}>
+                                        {visiblePassword ? (
+                                            <FaEyeSlash className="Button-icon" />
+                                        ) : (
+                                            <FaEye className="Button-icon" />
+                                        )}
+                                    </button>
+                                </FormGroup>
+                            </Col>
+                            <Col sm="6" >
+                                <FormGroup>
+                                    <Label>Estado</Label>
+                                    <Input bsSize="sm" type={"select"} name="esActivo" onChange={handleChange} value={usuario.esActivo} >
+                                        <option value={true}>Activo</option>
+                                        <option value={false}>No Activo</option>
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                        </Row>
+
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button size="sm" color="primary" type="submit">Guardar</Button>
+                        <Button size="sm" color="danger" onClick={cerrarModal}>Cerrar</Button>
+                    </ModalFooter>
+                </form>
             </Modal>
         </>
     )
