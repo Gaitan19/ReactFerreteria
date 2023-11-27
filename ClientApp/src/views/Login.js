@@ -140,7 +140,7 @@ const Login = () => {
                                                 />
                                             </div>
                                             <div className="form-group Input-password">
-                                                <input type={`${visiblePassword ? 'text' : 'password'}`} className="form-control form-control-user" placeholder="Contraseña"
+                                                <input type={`${visiblePassword ? 'text' : 'password'}`} className="form-control form-control-user Input-login" placeholder="Contraseña"
                                                     value={_clave}
                                                     onChange={(e) => set_Clave(e.target.value)}
                                                     required

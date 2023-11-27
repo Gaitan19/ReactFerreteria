@@ -160,6 +160,12 @@ const Venta = () => {
                         Swal.showValidationMessage(
                             `La cantidad excede al stock:${tempStock[0].stock}`
                         )
+                    } else if (parseInt(inputValue) < 1) {
+
+                        setA_Busqueda("")
+                        Swal.showValidationMessage(
+                            `La cantidad debe ser mayor a "0"`
+                        )
                     } else {
 
                         setProductsCart(() => [...productsCart, tempStock])
@@ -411,7 +417,7 @@ const Venta = () => {
                                 </Row>
                                 <Row className="mb-2">
                                     <Col sm={12}>
-                                        <InputGroup size="sm" >
+                                        <InputGroup size="sm" className="Input-impuestos">
                                             <InputGroupText>IGV (18%):</InputGroupText>
                                             <Input disabled value={igv} />
                                         </InputGroup>

@@ -3,18 +3,19 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { UserContext } from '../context/UserProvider';
+import { FaTools } from "react-icons/fa";
 
 const modelo = {
     nombre: "",
     correo: "",
     idRolNavigation: {
-        idRol:0,
+        idRol: 0,
         descripcion: ""
     }
 }
 const NavBar = () => {
 
-    const { user} = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     const [dataUser, setDataUser] = useState(modelo)
 
@@ -24,14 +25,15 @@ const NavBar = () => {
 
     }, [])
     return (
-        
+
         <ul className="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <Link className="sidebar-brand d-flex align-items-center justify-content-center" to="/">
                 <div className="sidebar-brand-icon">
-                    <i className="fas fa-desktop"></i>
+                    {/* <i className="fas fa-desktop"></i> */}
+                    <FaTools className='Icon-tools' />
                 </div>
-                <div className="sidebar-brand-text mx-3">Mi Tienda</div>
+                <div className="sidebar-brand-text mx-3">la Union</div>
             </Link>
 
 
@@ -46,7 +48,7 @@ const NavBar = () => {
                     </NavLink>
                 </li>
             }
-           
+
 
             <hr className="sidebar-divider" />
             {
@@ -64,7 +66,7 @@ const NavBar = () => {
                     </div>
                 </li>
             }
-            
+
             {
                 (dataUser.idRolNavigation.descripcion == "Administrador") &&
                 <li className="nav-item">
@@ -82,7 +84,7 @@ const NavBar = () => {
                     </div>
                 </li>
             }
-           
+
 
             <li className="nav-item">
                 <a className="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseVenta"
@@ -115,7 +117,7 @@ const NavBar = () => {
                     </div>
                 </li>
             }
-            
+
 
 
             <hr className="sidebar-divider d-none d-md-block" />
@@ -125,7 +127,7 @@ const NavBar = () => {
             </div>
 
         </ul>
-        )
+    )
 }
 
 export default NavBar;

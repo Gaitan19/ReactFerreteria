@@ -12147,6 +12147,18 @@ form.user .form-control-user {
     position: relative;
 }
 
+.Input-login{
+    padding-right: 40px !important;
+}
+
+.Input-impuestos{
+    display: none;
+}
+
+.Icon-tools{
+    font-size: 2rem;
+}
+
 .Container-modal-buttons{
     display: flex;
     gap: 11px;
