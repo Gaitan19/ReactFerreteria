@@ -12,8 +12,6 @@ const Login = () => {
     const { user, iniciarSession } = useContext(UserContext)
     const [visiblePassword, setVisiblePassword] = useState(false);
     const [usuarios, setUsuarios] = useState([]);
-    const [userFound, setUserFound] = useState(false);
-    const [usuario, setUsuario] = useState({});
 
     const obtenerUsuarios = async () => {
         let response = await fetch("api/usuario/Lista");
@@ -50,31 +48,48 @@ const Login = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        try {
 
-        let request = {
-            correo: _correo,
-            clave: _clave
-        }
-        let data;
-        let foundedData = false;
-
-        console.log('request :>> ', _clave + ",correo:", _correo);
-        console.log('usuarios :>> ', usuarios);
-
-        usuarios.forEach((item) => {
-            if (item.clave === _clave && item.correo === _correo) {
-                data = item;
-                foundedData = true;
-
+            let request = {
+                correo: _correo,
+                clave: _clave
             }
-        })
+            let data;
+            let foundedData = false;
+            let userFounded = false;
 
-        data.clave = cifrarPassword(data.clave);
 
-        if (foundedData) {
-            iniciarSession(data)
-        }
-        else {
+            usuarios.forEach((item) => {
+                if (item.correo === _correo) {
+                    userFounded = true
+                }
+
+                if (item.clave === _clave && item.correo === _correo) {
+                    data = item;
+                    foundedData = true;
+
+                }
+            })
+
+
+            if (foundedData) {
+                data.clave = cifrarPassword(data.clave);
+                iniciarSession(data)
+            }
+            else if (!userFounded) {
+                Swal.fire(
+                    'Opps!',
+                    'Correo no encontrado',
+                    'error'
+                )
+            } else {
+                Swal.fire(
+                    'Opps!',
+                    'Contraseña incorrecta',
+                    'error'
+                )
+            }
+        } catch (error) {
             Swal.fire(
                 'Opps!',
                 'No se pudo iniciar sessión',
