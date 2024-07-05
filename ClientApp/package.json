@@ -6,6 +6,7 @@
     "bcryptjs": "^2.4.3",
     "bootstrap": "^4.6.0",
     "crypto-js": "^4.2.0",
+    "fs": "^0.0.1-security",
     "http-proxy-middleware": "^0.19.1",
     "jquery": "^3.5.1",
     "merge": "^2.1.1",
