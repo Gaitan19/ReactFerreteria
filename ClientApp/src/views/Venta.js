@@ -17,6 +17,7 @@ import Autosuggest from 'react-autosuggest';
 import { useContext, useEffect, useState } from 'react';
 import './css/Venta.css';
 import { UserContext } from '../context/UserProvider';
+import { generateCode } from '../utils/generateCode';
 
 const modelo = {
   nombre: '',
@@ -33,7 +34,7 @@ const Venta = () => {
   const [a_Productos, setA_Productos] = useState([]);
   const [a_Busqueda, setA_Busqueda] = useState('');
 
-  const [documentoCliente, setDocumentoCliente] = useState('');
+  const [documentoCliente, setDocumentoCliente] = useState(generateCode());
   const [nombreCliente, setNombreCliente] = useState('');
 
   const [tipoDocumento, setTipoDocumento] = useState('Boleta');
@@ -228,22 +229,25 @@ const Venta = () => {
     let t = 0;
     let st = 0;
     let imp = 0;
+    let ti = 0;
 
     if (arrayProductos.length > 0) {
       arrayProductos.forEach((p) => {
         t = p.total + t;
       });
 
-      st = t / 1.18;
+      st = t / 1.15;
       imp = t - st;
+      ti = t + imp;
     }
 
     //Monto Base = (Monto con IGV) / (1.18)
 
     //IGV = (Monto con IGV) – (Monto Base)
 
-    setSubTotal(st.toFixed(2));
+    setSubTotal(t.toFixed(2));
     setIgv(imp.toFixed(2));
+    // setTotal(ti.toFixed(2));
     setTotal(t.toFixed(2));
   };
 
@@ -307,11 +311,12 @@ const Venta = () => {
                 <Row>
                   <Col sm={6}>
                     <FormGroup>
-                      <Label>Nro Documento</Label>
+                      <Label>Cod Documento</Label>
                       <Input
                         bsSize="sm"
                         value={documentoCliente}
                         onChange={(e) => setDocumentoCliente(e.target.value)}
+                        readOnly
                       />
                     </FormGroup>
                   </Col>
@@ -442,7 +447,7 @@ const Venta = () => {
                 <Row className="mb-2">
                   <Col sm={12}>
                     <InputGroup size="sm" className="Input-impuestos">
-                      <InputGroupText>IGV (18%):</InputGroupText>
+                      <InputGroupText>IGV (15%):</InputGroupText>
                       <Input disabled value={igv} />
                     </InputGroup>
                   </Col>
