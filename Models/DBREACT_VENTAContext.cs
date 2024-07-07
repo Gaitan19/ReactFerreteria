@@ -20,6 +20,7 @@ namespace ReactVentas.Models
         public virtual DbSet<DetalleVenta> DetalleVenta { get; set; } = null!;
         public virtual DbSet<NumeroDocumento> NumeroDocumentos { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
+        public virtual DbSet<Proveedor> Proveedores { get; set; } = null!;
         public virtual DbSet<Rol> Rols { get; set; } = null!;
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
         public virtual DbSet<Venta> Venta { get; set; } = null!;
@@ -140,6 +141,34 @@ namespace ReactVentas.Models
                     .WithMany(p => p.Productos)
                     .HasForeignKey(d => d.IdCategoria)
                     .HasConstraintName("FK__Producto__idCate__5812160E");
+            });
+
+            modelBuilder.Entity<Proveedor>(entity =>
+            {
+                entity.HasKey(e => e.IdProveedor)
+                    .HasName("PK__Proveedor__3213E83F");
+
+                entity.Property(e => e.IdProveedor).HasColumnName("idProveedor");
+
+                entity.Property(e => e.Nombre)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("nombre");
+
+                entity.Property(e => e.Correo)
+                    .HasMaxLength(80)
+                    .IsUnicode(false)
+                    .HasColumnName("correo");
+
+                entity.Property(e => e.Telefono)
+                    .HasMaxLength(40)
+                    .IsUnicode(false)
+                    .HasColumnName("telefono");
+
+                entity.Property(e => e.FechaRegistro)
+                    .HasColumnType("datetime")
+                    .HasColumnName("fechaRegistro")
+                    .HasDefaultValueSql("(getdate())");
             });
 
             modelBuilder.Entity<Rol>(entity =>
