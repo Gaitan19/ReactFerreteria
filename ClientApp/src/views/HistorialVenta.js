@@ -65,7 +65,6 @@ const HistorialVenta = () => {
   const mostrarModal = (data) => {
     setDetalleVenta(data);
     setVerModal(!verModal);
-    console.log('detalleVenta :>> ', detalleVenta);
   };
 
   return (
@@ -221,7 +220,7 @@ const HistorialVenta = () => {
                 />
               </FormGroup>
             </Col>
-            <Col sm={4}>
+            <Col sm={4} className="d-none">
               <FormGroup>
                 <Label>Tipo Documento:</Label>
                 <Input
@@ -279,8 +278,8 @@ const HistorialVenta = () => {
                   <tr key={index}>
                     <td>{item.producto}</td>
                     <td>{item.cantidad}</td>
-                    <td>{item.precio}</td>
-                    <td>{item.total}</td>
+                    <td>C${item.precio}</td>
+                    <td>C${item.total}</td>
                   </tr>
                 ))
               ) : (
@@ -296,13 +295,17 @@ const HistorialVenta = () => {
             <Col sm={4}>
               <FormGroup>
                 <Label>Sub Total:</Label>
-                <Input bsSize="sm" disabled value={detalleVenta.subTotal} />
+                <Input
+                  bsSize="sm"
+                  disabled
+                  value={`C$${detalleVenta.subTotal}`}
+                />
               </FormGroup>
             </Col>
             <Col sm={4}>
               <FormGroup>
                 <Label>Total:</Label>
-                <Input bsSize="sm" disabled value={detalleVenta.total} />
+                <Input bsSize="sm" disabled value={`C$${detalleVenta.total}`} />
               </FormGroup>
             </Col>
           </Row>
