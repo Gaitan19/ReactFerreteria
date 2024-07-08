@@ -1,24 +1,24 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import App from "./App";
-import Categoria from "./views/Categoria";
-import DashBoard from "./views/DashBoard";
-import HistorialVenta from "./views/HistorialVenta";
-import Inicio from "./views/Inicio";
-import NotFound from "./views/NotFound";
-import Producto from "./views/Producto";
-import ReporteVenta from "./views/ReporteVenta";
-import Usuario from "./views/Usuario";
-import Venta from "./views/Venta";
-import Login from "./views/Login";
+import App from './App';
+import Categoria from './views/Categoria';
+import DashBoard from './views/DashBoard';
+import HistorialVenta from './views/HistorialVenta';
+import Inicio from './views/Inicio';
+import NotFound from './views/NotFound';
+import Producto from './views/Producto';
+import ReporteVenta from './views/ReporteVenta';
+import Usuario from './views/Usuario';
+import Venta from './views/Venta';
+import Login from './views/Login';
 
-import UserProvider from "./context/UserProvider";
-import VerificarUsuario from "./componentes/VerificarUsuario";
-import Proveedor from "./views/Proveedor";
+import UserProvider from './context/UserProvider';
+import VerificarUsuario from './componentes/VerificarUsuario';
+import Proveedor from './views/Proveedor';
 
-const root = ReactDOM.createRoot(document.getElementById("wrapper"));
+const root = ReactDOM.createRoot(document.getElementById('wrapper'));
 
 root.render(
   <BrowserRouter>
@@ -36,8 +36,8 @@ root.render(
             path="dashboard"
             element={
               <VerificarUsuario>
-                {" "}
-                <DashBoard />{" "}
+                {' '}
+                <DashBoard />{' '}
               </VerificarUsuario>
             }
           />
@@ -45,8 +45,8 @@ root.render(
             path="usuario"
             element={
               <VerificarUsuario>
-                {" "}
-                <Usuario />{" "}
+                {' '}
+                <Usuario />{' '}
               </VerificarUsuario>
             }
           />
@@ -54,8 +54,8 @@ root.render(
             path="proveedor"
             element={
               <VerificarUsuario>
-                {" "}
-                <Proveedor />{" "}
+                {' '}
+                <Proveedor />{' '}
               </VerificarUsuario>
             }
           />
@@ -63,8 +63,8 @@ root.render(
             path="producto"
             element={
               <VerificarUsuario>
-                {" "}
-                <Producto />{" "}
+                {' '}
+                <Producto />{' '}
               </VerificarUsuario>
             }
           />
@@ -72,8 +72,8 @@ root.render(
             path="categoria"
             element={
               <VerificarUsuario>
-                {" "}
-                <Categoria />{" "}
+                {' '}
+                <Categoria />{' '}
               </VerificarUsuario>
             }
           />
@@ -81,8 +81,8 @@ root.render(
             path="venta"
             element={
               <VerificarUsuario>
-                {" "}
-                <Venta />{" "}
+                {' '}
+                <Venta />{' '}
               </VerificarUsuario>
             }
           />
@@ -90,8 +90,8 @@ root.render(
             path="historialventa"
             element={
               <VerificarUsuario>
-                {" "}
-                <HistorialVenta />{" "}
+                {' '}
+                <HistorialVenta />{' '}
               </VerificarUsuario>
             }
           />
@@ -99,8 +99,8 @@ root.render(
             path="reporteventa"
             element={
               <VerificarUsuario>
-                {" "}
-                <ReporteVenta />{" "}
+                {' '}
+                <ReporteVenta />{' '}
               </VerificarUsuario>
             }
           />
