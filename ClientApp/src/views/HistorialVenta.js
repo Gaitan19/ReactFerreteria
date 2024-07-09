@@ -18,9 +18,11 @@
 } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import Swal from 'sweetalert2';
+import React, { useState, useRef } from 'react';
+import ReactToPrint from 'react-to-print';
+import Ticket from '../componentes/Ticket';
 
 import 'react-datepicker/dist/react-datepicker.css';
-import { useState } from 'react';
 
 const HistorialVenta = () => {
   const [fechaInicio, setFechaInicio] = useState(new Date());
@@ -33,13 +35,15 @@ const HistorialVenta = () => {
 
   const [ventas, setVentas] = useState([]);
 
+  const ticketRef = useRef();
+
   const buscarVenta = () => {
     let options = { year: 'numeric', month: '2-digit', day: '2-digit' };
 
     let _fechaInicio = fechaInicio.toLocaleDateString('es-PE', options);
     let _fechaFin = fechaFin.toLocaleDateString('es-PE', options);
 
-    const api = fetch(
+    fetch(
       `api/venta/Listar?buscarPor=${buscarPor}&numeroVenta=${nroVenta}&fechaInicio=${_fechaInicio}&fechaFin=${_fechaFin}`
     )
       .then((response) => {
@@ -138,7 +142,7 @@ const HistorialVenta = () => {
                   </FormGroup>
                 </Col>
               </Row>
-              <hr></hr>
+              <hr />
               <Row>
                 <Col sm="12">
                   <Table striped responsive size="sm">
@@ -216,7 +220,7 @@ const HistorialVenta = () => {
                 />
               </FormGroup>
             </Col>
-            <Col sm={4}>
+            <Col sm={4} className="d-none">
               <FormGroup>
                 <Label>Tipo Documento:</Label>
                 <Input
@@ -259,58 +263,62 @@ const HistorialVenta = () => {
               </FormGroup>
             </Col>
           </Row>
+          <Table striped responsive size="sm">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detalleVenta.detalle ? (
+                detalleVenta.detalle.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.producto}</td>
+                    <td>{item.cantidad}</td>
+                    <td>C${item.precio}</td>
+                    <td>C${item.total}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center' }}>
+                    Sin resultados
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
           <Row>
             <Col sm={4}>
               <FormGroup>
                 <Label>Sub Total:</Label>
-                <Input bsSize="sm" disabled value={detalleVenta.subTotal} />
-              </FormGroup>
-            </Col>
-            <Col className="d-none" sm={4}>
-              <FormGroup>
-                <Label>IGV (15%):</Label>
-                <Input bsSize="sm" disabled value={detalleVenta.impuesto} />
+                <Input
+                  bsSize="sm"
+                  disabled
+                  value={`C$${detalleVenta.subTotal}`}
+                />
               </FormGroup>
             </Col>
             <Col sm={4}>
               <FormGroup>
                 <Label>Total:</Label>
-                <Input bsSize="sm" disabled value={detalleVenta.total} />
+                <Input bsSize="sm" disabled value={`C$${detalleVenta.total}`} />
               </FormGroup>
-            </Col>
-          </Row>
-          <Row>
-            <Col sm={12}>
-              <Table size="sm">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {detalleVenta.detalle == undefined ? (
-                    <tr>
-                      <td colSpan={4}>Sin productos</td>
-                    </tr>
-                  ) : (
-                    detalleVenta.detalle.map((item) => (
-                      <tr key={item.producto}>
-                        <td>{item.producto}</td>
-                        <td>{item.cantidad}</td>
-                        <td>{item.precio}</td>
-                        <td>{item.total}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </Table>
             </Col>
           </Row>
         </ModalBody>
         <ModalFooter>
+          <ReactToPrint
+            trigger={() => (
+              <Button size="sm" color="primary">
+                Imprimir
+              </Button>
+            )}
+            content={() => ticketRef.current}
+          />
           <Button
             size="sm"
             color="danger"
@@ -320,6 +328,10 @@ const HistorialVenta = () => {
           </Button>
         </ModalFooter>
       </Modal>
+
+      <div style={{ display: 'none' }}>
+        <Ticket ref={ticketRef} detalleVenta={detalleVenta} />
+      </div>
     </>
   );
 };

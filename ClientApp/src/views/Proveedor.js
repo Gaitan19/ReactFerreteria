@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
+import { useEffect, useState } from 'react';
+import DataTable from 'react-data-table-component';
 import {
   Card,
   CardBody,
@@ -14,15 +14,15 @@ import {
   ModalFooter,
   Row,
   Col,
-} from "reactstrap";
-import Swal from "sweetalert2";
+} from 'reactstrap';
+import Swal from 'sweetalert2';
 
 const modeloProveedor = {
   idProveedor: 0,
-  nombre: "",
-  correo: "",
-  telefono: "",
-  fechaRegistro: "",
+  nombre: '',
+  correo: '',
+  telefono: '',
+  fechaRegistro: '',
 };
 
 const Proveedor = () => {
@@ -39,7 +39,7 @@ const Proveedor = () => {
   };
 
   const obtenerProveedores = async () => {
-    let response = await fetch("api/proveedor/Lista");
+    let response = await fetch('api/proveedor/Lista');
     if (response.ok) {
       let data = await response.json();
       setProveedores(data);
@@ -53,22 +53,22 @@ const Proveedor = () => {
 
   const columns = [
     {
-      name: "Nombre",
+      name: 'Nombre',
       selector: (row) => row.nombre,
       sortable: true,
     },
     {
-      name: "Correo",
+      name: 'Correo',
       selector: (row) => row.correo,
       sortable: true,
     },
     {
-      name: "Telefono",
+      name: 'Telefono',
       selector: (row) => row.telefono,
       sortable: true,
     },
     {
-      name: "",
+      name: '',
       cell: (row) => (
         <>
           <Button
@@ -95,22 +95,22 @@ const Proveedor = () => {
   const customStyles = {
     headCells: {
       style: {
-        fontSize: "13px",
+        fontSize: '13px',
         fontWeight: 800,
       },
     },
     headRow: {
       style: {
-        backgroundColor: "#eee",
+        backgroundColor: '#eee',
       },
     },
   };
 
   const paginationComponentOptions = {
-    rowsPerPageText: "Filas por página",
-    rangeSeparatorText: "de",
+    rowsPerPageText: 'Filas por página',
+    rangeSeparatorText: 'de',
     selectAllRowsItem: true,
-    selectAllRowsItemText: "Todos",
+    selectAllRowsItemText: 'Todos',
   };
 
   const abrirEditarModal = (data) => {
@@ -133,18 +133,18 @@ const Proveedor = () => {
         telefono: proveedor.telefono,
       };
 
-      response = await fetch("api/proveedor/Guardar", {
-        method: "POST",
+      response = await fetch('api/proveedor/Guardar', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json;charset=utf-8",
+          'Content-Type': 'application/json;charset=utf-8',
         },
         body: JSON.stringify(newProveedor),
       });
     } else {
-      response = await fetch("api/proveedor/Editar", {
-        method: "PUT",
+      response = await fetch('api/proveedor/Editar', {
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json;charset=utf-8",
+          'Content-Type': 'application/json;charset=utf-8',
         },
         body: JSON.stringify(proveedor),
       });
@@ -152,44 +152,44 @@ const Proveedor = () => {
 
     if (response.ok) {
       Swal.fire(
-        `${proveedor.idProveedor == 0 ? "Guardado" : "Actualizado"}`,
+        `${proveedor.idProveedor == 0 ? 'Guardado' : 'Actualizado'}`,
         `El proveedor fue ${
-          proveedor.idProveedor == 0 ? "agregado" : "actualizado"
+          proveedor.idProveedor == 0 ? 'agregado' : 'actualizado'
         }`,
-        "success"
+        'success'
       );
 
       await obtenerProveedores();
       setProveedor(modeloProveedor);
       setVerModal(!verModal);
     } else {
-      alert("Error al guardar");
+      alert('Error al guardar');
     }
   };
 
   const eliminarProveedor = async (proveedorDelete) => {
     Swal.fire({
-      title: "¿Está seguro?",
-      text: "Desea eliminar el proveedor",
-      icon: "warning",
+      title: '¿Está seguro?',
+      text: 'Desea eliminar el proveedor',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, continuar",
-      cancelButtonText: "No, volver",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, continuar',
+      cancelButtonText: 'No, volver',
     }).then(async (result) => {
       if (result.isConfirmed) {
         let response = await fetch(
           `api/proveedor/Eliminar/${proveedorDelete.idProveedor}`,
           {
-            method: "DELETE",
+            method: 'DELETE',
           }
         );
 
         if (response.ok) {
           obtenerProveedores();
 
-          Swal.fire("Eliminado!", "El proveedor fue eliminado.", "success");
+          Swal.fire('Eliminado!', 'El proveedor fue eliminado.', 'success');
         }
       }
     });
@@ -203,7 +203,7 @@ const Proveedor = () => {
   return (
     <>
       <Card>
-        <CardHeader style={{ backgroundColor: "#4e73df", color: "white" }}>
+        <CardHeader style={{ backgroundColor: '#4e73df', color: 'white' }}>
           Lista de Proveedores
         </CardHeader>
         <CardBody>
