@@ -1,16 +1,14 @@
-import React from 'react';
-import '../views/css/Ticket.css';
+import React from "react";
+import "../views/css/Ticket.css";
 
 const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
-  console.log('detalleVenta :>> ', detalleVenta);
+  console.log("detalleVenta :>> ", detalleVenta);
 
   return (
     <div ref={ref} className="ticket">
       <div className="ticket__header">
         <h4 className="ticket__title">Ferretería la Unión</h4>
-        <p className="ticket__address">
-          Carretera Muelle 38, 37531 Ávila, Ávila
-        </p>
+        <p className="ticket__address">Maxi Pali Waspan Sur, 1 1/2c. Arriba</p>
         <hr className="ticket__separator" />
       </div>
       <div className="ticket__body">
@@ -19,6 +17,9 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
         </p>
         <p className="ticket__info">
           <strong>Fecha Registro:</strong> {detalleVenta.fechaRegistro}
+        </p>
+        <p className="ticket__info">
+          <strong>Celular:</strong> 8764-4751
         </p>
         <p className="ticket__info">
           <strong>Numero Venta:</strong> {detalleVenta.numeroDocumento}
