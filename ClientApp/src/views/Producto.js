@@ -56,7 +56,6 @@ const Producto = () => {
     let response = await fetch('api/categoria/Lista');
     if (response.ok) {
       let data = await response.json();
-      // setCategorias(data)
       setCategorias(() => data.filter((item) => item.esActivo));
       console.log('categorias :>> ', categorias);
     }
@@ -129,7 +128,6 @@ const Producto = () => {
           <Button
             color="danger"
             size="sm"
-            // onClick={() => eliminarProducto(row.idProducto)}
             onClick={() => eliminarProducto(row)}
           >
             <i className="fas fa-trash-alt"></i>

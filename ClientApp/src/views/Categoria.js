@@ -196,19 +196,7 @@ const Categoria = () => {
           Swal.fire('Eliminado!', 'La categoria fue eliminada.', 'success');
         }
 
-        // const response = fetch("api/categoria/Eliminar/" + id, { method: "DELETE" })
-        //     .then(response => {
-        //         if (response.ok) {
-
-        //             obtenerCategorias();
-
-        //             Swal.fire(
-        //                 'Eliminado!',
-        //                 'La categoria fue eliminada.',
-        //                 'success'
-        //             )
-        //         }
-        //     })
+        
       }
     });
   };

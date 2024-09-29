@@ -74,7 +74,6 @@ const Usuario = () => {
           tempData.push(item);
         }
       });
-      // setUsuarios(() => data.filter((item) => item.esActivo))
       setUsuarios(() => tempData);
       setPendiente(false);
     }
@@ -246,19 +245,7 @@ const Usuario = () => {
 
           Swal.fire('Eliminado!', 'El usuario fue eliminado.', 'success');
         }
-        // const response = fetch("api/usuario/Eliminar/" + id, { method: "DELETE" })
-        //     .then(response => {
-        //         if (response.ok) {
-
-        //             obtenerUsuarios();
-
-        //             Swal.fire(
-        //                 'Eliminado!',
-        //                 'El usuario fue eliminado.',
-        //                 'success'
-        //             )
-        //         }
-        //     })
+       
       }
     });
   };

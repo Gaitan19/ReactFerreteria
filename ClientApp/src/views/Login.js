@@ -99,34 +99,7 @@ const Login = () => {
 
 
 
-        // const api = fetch("api/session/Login", {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json;charset=utf-8'
-        //     },
-        //     body: JSON.stringify(request)
-        // })
-        //     .then((response) => {
-        //         return response.ok ? response.json() : Promise.reject(response);
-        //     })
-        //     .then((dataJson) => {
-        //         if (dataJson.idUsuario == 0) {
-        //             Swal.fire(
-        //                 'Opps!',
-        //                 'No se encontro el usuario',
-        //                 'error'
-        //             )
-        //         } else {
-        //             iniciarSession(dataJson)
-        //         }
-
-        //     }).catch((error) => {
-        //         Swal.fire(
-        //             'Opps!',
-        //             'No se pudo iniciar sessión',
-        //             'error'
-        //         )
-        //     })
+       
     }
 
     return (
