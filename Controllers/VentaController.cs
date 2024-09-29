@@ -15,12 +15,17 @@ namespace ReactVentas.Controllers
     public class VentaController : ControllerBase
     {
         private readonly DBREACT_VENTAContext _context;
+
         public VentaController(DBREACT_VENTAContext context)
         {
             _context = context;
-
         }
 
+        /// <summary>
+        /// Searches for products based on the search string.
+        /// </summary>
+        /// <param name="busqueda">The search string to filter products.</param>
+        /// <returns>A list of products matching the search criteria.</returns>
         [HttpGet]
         [Route("Productos/{busqueda}")]
         public async Task<IActionResult> Productos(string busqueda)
@@ -39,23 +44,30 @@ namespace ReactVentas.Controllers
                     Precio = p.Precio
                 }).ToListAsync();
 
-
                 return StatusCode(StatusCodes.Status200OK, lista);
             }
             catch (Exception ex)
             {
+                // Log exception details here if necessary
                 return StatusCode(StatusCodes.Status500InternalServerError, lista);
             }
         }
 
+        /// <summary>
+        /// Registers a new sale.
+        /// </summary>
+        /// <param name="request">The sale data to register.</param>
+        /// <returns>The document number of the registered sale.</returns>
         [HttpPost]
         [Route("Registrar")]
-        public IActionResult Registrar([FromBody] DtoVenta request) {
+        public IActionResult Registrar([FromBody] DtoVenta request)
+        {
             try
             {
                 string numeroDocumento = "";
-
                 XElement productos = new XElement("Productos");
+
+                // Construct XML from the product list
                 foreach (DtoProducto item in request.listaProductos)
                 {
                     productos.Add(new XElement("Item",
@@ -63,14 +75,16 @@ namespace ReactVentas.Controllers
                         new XElement("Cantidad", item.Cantidad),
                         new XElement("Precio", item.Precio),
                         new XElement("Total", item.Total)
-                        ));
+                    ));
                 }
 
                 using (SqlConnection con = new SqlConnection(_context.Database.GetConnectionString()))
                 {
                     con.Open();
-                    SqlCommand cmd = new SqlCommand("sp_RegistrarVenta", con);
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlCommand cmd = new SqlCommand("sp_RegistrarVenta", con)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
                     cmd.Parameters.Add("documentoCliente", SqlDbType.VarChar, 40).Value = request.documentoCliente;
                     cmd.Parameters.Add("nombreCliente", SqlDbType.VarChar, 40).Value = request.nombreCliente;
                     cmd.Parameters.Add("tipoDocumento", SqlDbType.VarChar, 50).Value = request.tipoDocumento;
@@ -86,17 +100,21 @@ namespace ReactVentas.Controllers
 
                 return StatusCode(StatusCodes.Status200OK, new { numeroDocumento = numeroDocumento });
             }
-            catch (Exception ex) {
-
-                var str = ex.Message;
+            catch (Exception ex)
+            {
+                // Log exception details here if necessary
                 return StatusCode(StatusCodes.Status500InternalServerError, new { numeroDocumento = "" });
             }
-
         }
 
+        /// <summary>
+        /// Lists sales based on filter criteria.
+        /// </summary>
+        /// <returns>A list of sales matching the filter criteria.</returns>
         [HttpGet]
         [Route("Listar")]
-        public async Task<IActionResult> Listar() {
+        public async Task<IActionResult> Listar()
+        {
             string buscarPor = HttpContext.Request.Query["buscarPor"];
             string numeroVenta = HttpContext.Request.Query["numeroVenta"];
             string fechaInicio = HttpContext.Request.Query["fechaInicio"];
@@ -110,13 +128,15 @@ namespace ReactVentas.Controllers
             {
                 if (buscarPor == "fecha")
                 {
+                    // Filter sales by date range
                     lista_venta = await _context.Venta
                         .Include(u => u.IdUsuarioNavigation)
                         .Include(d => d.DetalleVenta)
                         .ThenInclude(p => p.IdProductoNavigation)
                         .Where(v => v.FechaRegistro.Value.Date >= _fechainicio.Date && v.FechaRegistro.Value.Date <= _fechafin.Date)
-                        .Select( v=> new DtoHistorialVenta() { 
-                            FechaRegistro =  v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
+                        .Select(v => new DtoHistorialVenta()
+                        {
+                            FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
                             NumeroDocumento = v.NumeroDocumento,
                             TipoDocumento = v.TipoDocumento,
                             DocumentoCliente = v.DocumentoCliente,
@@ -125,7 +145,8 @@ namespace ReactVentas.Controllers
                             SubTotal = v.SubTotal.ToString(),
                             Impuesto = v.ImpuestoTotal.ToString(),
                             Total = v.Total.ToString(),
-                            Detalle = v.DetalleVenta.Select( d => new DtoDetalleVenta() { 
+                            Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
+                            {
                                 Producto = d.IdProductoNavigation.Descripcion,
                                 Cantidad = d.Cantidad.ToString(),
                                 Precio = d.Precio.ToString(),
@@ -136,6 +157,7 @@ namespace ReactVentas.Controllers
                 }
                 else
                 {
+                    // Filter sales by document number
                     lista_venta = await _context.Venta
                         .Include(u => u.IdUsuarioNavigation)
                         .Include(d => d.DetalleVenta)
@@ -162,17 +184,19 @@ namespace ReactVentas.Controllers
                         }).ToListAsync();
                 }
 
-
                 return StatusCode(StatusCodes.Status200OK, lista_venta);
             }
-            catch (Exception ex) {
-                var str = ex.Message;
+            catch (Exception ex)
+            {
+                // Log exception details here if necessary
                 return StatusCode(StatusCodes.Status500InternalServerError, lista_venta);
             }
-            
-
         }
 
+        /// <summary>
+        /// Generates a sales report for a specified date range.
+        /// </summary>
+        /// <returns>A report of sales within the specified date range.</returns>
         [HttpGet]
         [Route("Reporte")]
         public async Task<IActionResult> Reporte()
@@ -191,32 +215,28 @@ namespace ReactVentas.Controllers
                                join p in _context.Productos on d.IdProducto equals p.IdProducto
                                where v.FechaRegistro.Value.Date >= _fechainicio.Date && v.FechaRegistro.Value.Date <= _fechafin.Date
                                select new DtoReporteVenta()
-                                 {
-                                     FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
-                                     NumeroDocumento = v.NumeroDocumento,
-                                     TipoDocumento = v.TipoDocumento,
-                                     DocumentoCliente = v.DocumentoCliente,
-                                     NombreCliente = v.NombreCliente,
-                                     SubTotalVenta = v.SubTotal.ToString(),
-                                     ImpuestoTotalVenta = v.ImpuestoTotal.ToString(),
-                                     TotalVenta = v.Total.ToString(),
-                                     Producto = p.Descripcion,
-                                     Cantidad = d.Cantidad.ToString(),
-                                     Precio = d.Precio.ToString(),
-                                     Total = d.Total.ToString()
-                                 }).ToList();
-
-
+                               {
+                                   FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
+                                   NumeroDocumento = v.NumeroDocumento,
+                                   TipoDocumento = v.TipoDocumento,
+                                   DocumentoCliente = v.DocumentoCliente,
+                                   NombreCliente = v.NombreCliente,
+                                   SubTotalVenta = v.SubTotal.ToString(),
+                                   ImpuestoTotalVenta = v.ImpuestoTotal.ToString(),
+                                   TotalVenta = v.Total.ToString(),
+                                   Producto = p.Descripcion,
+                                   Cantidad = d.Cantidad.ToString(),
+                                   Precio = d.Precio.ToString(),
+                                   Total = d.Total.ToString()
+                               }).ToList();
 
                 return StatusCode(StatusCodes.Status200OK, lista_venta);
             }
             catch (Exception ex)
             {
-                var str = ex.Message;
+                // Log exception details here if necessary
                 return StatusCode(StatusCodes.Status500InternalServerError, lista_venta);
             }
-
-
         }
     }
 }

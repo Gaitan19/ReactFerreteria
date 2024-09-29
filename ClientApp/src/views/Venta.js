@@ -95,9 +95,7 @@ const Venta = () => {
             const tempStock = tempProducts.filter(
               (item2) => item2.idProducto === item.idProducto
             );
-            // console.log("tempStock:", tempStock[0].stock)
-            // console.log('item :>> ', item);
-            // console.log('products :>> ', tempProducts);
+            
             if (
               item.precio > 0 &&
               isInCart &&
