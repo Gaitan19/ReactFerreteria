@@ -125,7 +125,6 @@ const Proveedor = () => {
 
   const guardarCambios = async () => {
     let response;
-    console.log(proveedor);
     if (proveedor.idProveedor == 0) {
       const newProveedor = {
         nombre: proveedor.nombre,

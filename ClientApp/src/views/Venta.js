@@ -47,7 +47,7 @@ const Venta = () => {
   const [alreadyProductos, setAlreadyProductos] = useState(false);
 
   const reestablecer = () => {
-    setDocumentoCliente('');
+    setDocumentoCliente(generateCode());
     setNombreCliente('');
     setTipoDocumento('Boleta');
     setProductos([]);
@@ -76,7 +76,6 @@ const Venta = () => {
         return response.ok ? response.json() : Promise.reject(response);
       })
       .then((dataJson) => {
-        console.log('dataJson :>> ', dataJson);
         let isInCart = true;
         dataJson.forEach((item) => {
           productsCart.forEach((tempItem) => {
@@ -394,8 +393,8 @@ const Venta = () => {
                               </td>
                               <td>{item.descripcion}</td>
                               <td>{item.cantidad}</td>
-                              <td>{item.precio}</td>
-                              <td>{item.total}</td>
+                              <td>C${item.precio}</td>
+                              <td>C${item.total}</td>
                             </tr>
                           ))
                         )}
@@ -437,7 +436,7 @@ const Venta = () => {
                 <Row className="mb-2">
                   <Col sm={12}>
                     <InputGroup size="sm">
-                      <InputGroupText>Sub Total:</InputGroupText>
+                      <InputGroupText>Sub Total:C$</InputGroupText>
                       <Input disabled value={subTotal} />
                     </InputGroup>
                   </Col>
@@ -453,7 +452,7 @@ const Venta = () => {
                 <Row>
                   <Col sm={12}>
                     <InputGroup size="sm">
-                      <InputGroupText>Total:</InputGroupText>
+                      <InputGroupText>Total:C$</InputGroupText>
                       <Input disabled value={total} />
                     </InputGroup>
                   </Col>

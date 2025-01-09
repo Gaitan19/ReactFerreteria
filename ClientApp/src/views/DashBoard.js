@@ -61,6 +61,7 @@ const DashBoard = () => {
                 let lblsDonut = d.productosVendidos.map((item) => { return item.producto })
                 let dtaDonut = d.productosVendidos.map((item) => { return item.total })
 
+
                 let modeloBar = {
                     labels: lblsBar,
                     datasets: [
